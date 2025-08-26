@@ -87,6 +87,33 @@ describe('Markdown escapers', () => {
 		test('url', () => {
 			for (const url of testURLs) expect(escapeItalic(url)).toBe(url);
 		});
+
+		test('asterisk in urls (fix for commit 35ec807)', () => {
+			const testURLsWithAsterisks = [
+				'https://example.com/name*wow',
+				'https://example.com/name**wow',
+				'https://example.com/name*with*asterisks',
+				'https://example.com/name**with**asterisks',
+				'https://example.com/name*with*asterisks*and**double**asterisks',
+				'http://example.com/search?q=test*query',
+				'https://api.example.com/endpoint*special',
+			];
+			for (const url of testURLsWithAsterisks) {
+				expect(escapeItalic(url)).toBe(url);
+			}
+		});
+
+		test('asterisk outside urls still escaped', () => {
+			// Test that asterisks outside of URLs are still properly escaped
+			expect(escapeItalic('This *should* be escaped')).toBe('This \\*should\\* be escaped');
+			expect(escapeItalic('*start and end*')).toBe('\\*start and end\\*');
+			expect(escapeItalic('But this url https://example.com/test*path should not')).toBe(
+				'But this url https://example.com/test*path should not',
+			);
+			expect(escapeItalic('Mixed: *escaped* and https://example.com/test*unescaped')).toBe(
+				'Mixed: \\*escaped\\* and https://example.com/test*unescaped',
+			);
+		});
 	});
 
 	describe('escapeUnderline', () => {
